@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<syntax name="vcl">
+    <meta>
+        <name>VCL</name>
+        <type>compiled</type>
+        <preferred-file-extension>vcl</preferred-file-extension>
+    </meta>
+    
+    <detectors>
+        <extension priority="1.0">vcl</extension>
+    </detectors>
+    
+    <indentation>
+        <increase>
+            <expression>(\{[^}\"']*$)|(\[[^\]\"']*$)|(\([^)\"']*$)</expression>
+        </increase>
+        <decrease>
+            <expression>^\s*(\s*/\*.*\*/\s*)*[\}\]\)\\]</expression>
+        </decrease>
+    </indentation>
+    <comments>
+        <single>
+            <expression>//</expression>
+        </single>
+        <single>
+            <expression>#</expression>
+        </single>
+        <multiline>
+            <starts-with>
+                <expression>/*</expression>
+            </starts-with>
+            <ends-with>
+                <expression>*/</expression>
+            </ends-with>
+        </multiline>
+    </comments>
+    <brackets>
+        <pair open="{" close="}" />
+        <pair open="(" close=")" />
+    </brackets>
+    <autoclosing-pairs>
+        <pair open="{" close="}" skip="string,comment" />
+        <pair open="(" close=")" skip="string,comment" />
+        <pair open="&quot;" close="&quot;" skip="string" />
+    </autoclosing-pairs>
+    <surrounding-pairs>
+        <pair open="{" close="}" />
+        <pair open="(" close=")" />
+        <pair open="&quot;" close="&quot;" />
+    </surrounding-pairs>
+    
+    <scopes>
+        <include syntax="self" collection="comments" />
+        <include syntax="self" collection="keywords" />
+        <include syntax="self" collection="values" />
+        <include syntax="self" collection="blocks" />
+        <include syntax="self" collection="definitions" />
+        <include syntax="self" collection="identifiers" />
+    </scopes>
+    
+    <collections>
+        <!-- Syntax -->
+        <collection name="syntax">
+            <scope name="vcl.bracket.block.start">
+                <symbol type="block">
+                    <context behavior="start" />
+                </symbol>
+                <expression>\{</expression>
+            </scope>
+            <scope name="vcl.bracket.block.end">
+                <symbol type="block">
+                    <context behavior="end" />
+                </symbol>
+                <expression>\}</expression>
+            </scope>
+            <scope name="vcl.bracket">
+                <expression>[\(\[\)\]]</expression>
+            </scope>
+            <scope name="vcl.operator">
+                <expression>(\+|\-|\*|/|%|\+\+|\-\-|\=|\=\=|!\=|\+\=|\-\=|\*\=|/\=|%\=|\&lt;|\&gt;|\&lt;\=|\&gt;=|\=\=\=|!\=\=|&amp;&amp;|\||\|\||!|\^|&amp;|\&lt;\&lt;|\&gt;\&gt;|~)</expression>
+            </scope>
+            <scope name="vcl.comma">
+                <expression>,</expression>
+            </scope>
+            <scope name="vcl.semicolon">
+                <expression>;</expression>
+            </scope>
+        </collection>
+        
+        <!-- Definitions -->
+        <collection name="definitions">
+            <!-- Subroutine -->
+            <scope name="vcl.definition.subroutine">
+                <symbol type="function">
+                    <context behavior="subtree" foldable="false"/>
+                </symbol>
+                <starts-with>
+                    <expression>(?:\b(sub)\s+)([a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9_]*)(?:\s+(\{))</expression>
+                    <capture number="1" name="vcl.keyword" />
+                    <capture number="2" name="vcl.name.subroutine" >
+                        <symbol type="function" />
+                    </capture>
+                    <capture number="3" name="vcl.block.bracket" />
+                </starts-with>
+                <ends-with>
+                    <expression>\}</expression>
+                    <capture number="0" name="vcl.block.bracket" />
+                </ends-with>
+                <subscopes>
+                    <include syntax="self" />
+                </subscopes>
+            </scope>
+            <scope name="vcl.definition.set">
+                <starts-with>
+                    <expression>(?:\b(set)\s+)([a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9:_.-]*)\s+(\=)</expression>
+                    <capture number="1" name="vcl.keyword" />
+                    <capture number="2" name="vcl.identifier.property">
+                        <symbol type="property" scope="global" />
+                    </capture>
+                    <capture number="3" name="vcl.operator" />
+                </starts-with>
+                <ends-with>
+                    <expression>;</expression>
+                    <capture number="0" name="vcl.block.bracket" />
+                </ends-with>
+                <subscopes>
+                    <include syntax="self" />
+                </subscopes>
+            </scope>
+            <scope name="vcl.definition.unset">
+                <starts-with>
+                    <expression>(?:\b(unset)\s+)([a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9:_.-]*)</expression>
+                    <capture number="1" name="vcl.keyword" />
+                    <capture number="2" name="vcl.identifier.property" >
+                        <symbol type="property" scope="global" />
+                    </capture>
+                </starts-with>
+                <ends-with>
+                    <expression>;</expression>
+                    <capture number="0" name="vcl.block.bracket" />
+                </ends-with>
+                <subscopes>
+                    <include syntax="self" />
+                </subscopes>
+            </scope>
+            <scope name="vcl.definition.declare">
+                <starts-with>
+                    <expression>(?:\b(declare)\s+(local)\s+)([a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9_.-]*)\s+([A-Z]+)</expression>
+                    <capture number="1" name="vcl.keyword" />
+                    <capture number="2" name="vcl.keyword" >
+                        <symbol type="property" scope="local" />
+                    </capture>
+                    <capture number="3" name="vcl.identifier.property" />
+                    <capture number="4" name="vcl.identifier.type" />
+                </starts-with>
+                <ends-with>
+                    <expression>;</expression>
+                    <capture number="0" name="vcl.block.bracket" />
+                </ends-with>
+                <subscopes>
+                    <include syntax="self" />
+                </subscopes>
+            </scope>
+            <scope name="vcl.definition.call">
+                <starts-with>
+                    <expression>(?:\b(call)\s+)([a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9_.-]*)</expression>
+                    <capture number="1" name="vcl.keyword" />
+                    <capture number="2" name="vcl.identifier.subroutine">
+                        <symbol type="function" scope="global"/>
+                    </capture>
+                </starts-with>
+                <ends-with>
+                    <expression>;</expression>
+                    <capture number="0" name="vcl.block.bracket" />
+                </ends-with>
+                <subscopes>
+                    <include syntax="self" />
+                </subscopes>
+            </scope>
+            <scope name="vcl.definition.return">
+                <symbol type="function" scope="global" />
+                <starts-with>
+                    <expression>\b(return)\s*(\(([a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9_.-]*)\))?</expression>
+                    <capture number="1" name="vcl.keyword" />
+                    <capture number="3" name="vcl.identifier.subroutine" >
+                        <symbol type="function" />
+                    </capture>
+                </starts-with>
+                <ends-with>
+                    <expression>;</expression>
+                    <capture number="0" name="vcl.block.bracket" />
+                </ends-with>
+                <subscopes>
+                    <include syntax="self" />
+                </subscopes>
+            </scope>
+        </collection>
+        
+        <!-- Blocks -->
+        <collection name="blocks">
+            <scope name="vcl.block">
+                <symbol type="block">
+                    <context behavior="subtree" />
+                </symbol>
+                <starts-with>
+                    <expression>\{</expression>
+                    <capture number="0" name="vcl.block.bracket" />
+                </starts-with>
+                <ends-with>
+                    <expression>\}</expression>
+                    <capture number="0" name="vcl.block.bracket" />
+                </ends-with>
+                <subscopes>
+                    <include syntax="self" />
+                </subscopes>
+            </scope>
+        </collection>
+        <collection name="comments">
+            <scope name="vcl.comment.single" spell-check="true">
+                <expression>(\/\/)(.*)$</expression>
+                <capture number="1" name="vcl.punctuation.definition.begin" />
+                <capture number="2" name="vcl.comment.content" />
+            </scope>
+            <scope name="vcl.comment.single" spell-check="true">
+                <expression>(\#)(.*)$</expression>
+                <capture number="1" name="vcl.punctuation.definition.begin" />
+                <capture number="2" name="vcl.comment.content" />
+            </scope>
+            <scope name="vcl.comment.multiline" spell-check="true">
+                <symbol type="comment">
+                    <context behavior="subtree" />
+                </symbol>
+                <starts-with>
+                    <expression>/\*</expression>
+                    <capture number="0" name="vcl.punctuation.definition.begin" />
+                </starts-with>
+                <ends-with>
+                    <expression>\*/</expression>
+                    <capture number="0" name="vcl.punctuation.definition.end" />
+                </ends-with>
+            </scope>
+        </collection>
+        
+        <!-- Keywords -->
+        <collection name="keywords">
+            <scope name="vcl.keyword">
+                <symbol type="keyword" />
+                <strings>
+                    <string>rollback</string>
+                    <string>synthetic</string>
+                    <string>panic</string>
+                    <string>backend</string>
+                    <string>if</string>
+                    <string>director</string>
+                    <string>acl</string>
+                    <string>include</string>
+                    <string>now</string>
+                    <string>error</string>
+                    <string>log</string>
+                </strings>
+            </scope>
+        </collection>
+        
+        <collection name="values">
+            <include syntax="self" collection="strings" />
+            <scope name="vcl.value.boolean">
+                <strings>
+                    <string>true</string>
+                    <string>false</string>
+                </strings>
+            </scope>
+            <scope name="vcl.value.number.float">
+                <!--Equivalent: .0001, 0.0001, 1e-4, 1.0e-4-->
+                <expression>\b((([0-9]+)?\.[0-9]+([eE]-?[0-9]+)?)|([0-9]+[eE]-?[0-9]+))\b</expression>
+            </scope>
+            <scope name="vcl.value.number.integer">
+                <expression>\b-?[0-9]+\b</expression>
+            </scope>
+            <scope name="vcl.value.number.time">
+                <expression>\b-?[0-9]+(s|m|h|d)\b</expression>
+            </scope>
+            <scope name="vcl.value.number">
+                <expression>\b\-?(?:\d+(?:\.\d*)?|(?:\.\d+))\b</expression>
+            </scope>
+        </collection>
+    
+        <!-- Strings -->
+        <collection name="strings">
+            <scope name="vcl.string.double-quoted">
+                <starts-with>
+                    <expression>&quot;</expression>
+                    <capture number="0" name="vcl.string.double-quoted.delimiter" />
+                </starts-with>
+                <ends-with>
+                    <expression>&quot;|(?:(?&lt;!\\)$)</expression>
+                    <capture number="0" name="vcl.string.double-quoted.delimiter" />
+                </ends-with>
+                <subscopes>
+                    <scope name="vcl.string.double-quoted.escape">
+                        <expression>\\(?:\\|&quot;|n|r|t|b|f)</expression>
+                    </scope>
+                </subscopes>
+            </scope>
+        </collection>
+        
+        <!-- Identifiers -->
+        <collection name="identifiers">
+            <scope name="vcl.identifier.global.object">
+                <symbol type="property"/>
+                <strings prefix="(?&lt;!\.)">
+                    <string>req</string>
+                    <string>bereq</string>
+                    <string>resp</string>
+                    <string>beresp</string>
+                    <string>table</string>
+                    <string>var</string>
+                    <string>re</string>
+                    <string>digest</string>
+                    <string>obj</string>
+                    <string>stale</string>
+                    <string>client</string>
+                    <string>fastly_info</string>
+                    <string>quic</string>
+                    <string>tls</string>
+                    <string>time</string>
+                    <string>esi</string>
+                    <string>geoip</string>
+                    <string>math</string>
+                    <string>director</string>
+                    <string>fastly</string>
+                    <string>workspace</string>
+                    <string>server</string>
+                    <string>std</string>
+                </strings>
+            </scope>
+            <scope name="vcl.identifier.global.function">
+                <symbol type="function"/>
+                <strings prefix="(?&lt;!\.)" suffix="(?=\()">
+                    <string>randomstr</string>
+                    <string>urlencode</string>
+                    <string>regsuball</string>
+                </strings>
+            </scope>
+            <scope name="vcl.identifier.property">
+                <symbol type="property"/>
+                <expression>\b(?&lt;=\.)([a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9:_-]*)(?!\()\b</expression>
+            </scope>
+            <scope name="vcl.identifier.method">
+                <symbol type="property"/>
+                <expression>\b(?&lt;=\.)([a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9_]*)(?=\()\b</expression>
+            </scope>
+            <scope name="vcl.identifier.function">
+                <symbol type="function"/>
+                <expression>\b(?&lt;!\.)([a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9_]*)(?=\()\b</expression>
+            </scope>
+            <scope name="vcl.identifier.constant">
+                <symbol type="constant"/>
+                <expression>\b(?&lt;![a-z0-9_])[A-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9_]*\b</expression>
+            </scope>
+            <scope name="vcl.identifier.subroutine">
+                <symbol type="function" />
+                <expression>\b(?&lt;!\.)([a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9_]*)(?=\()\b</expression>
+            </scope>
+            <scope name="vcl.identifier">
+                <expression>\b[a-zA-Z_][A-Za-zÀ-ÖØ-öø-ÿ0-9_\.]*\b</expression>
+            </scope>
+        </collection>
+        
+    </collections>
+</syntax>

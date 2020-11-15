@@ -1,0 +1,8 @@
+{
+    "identifier": "net.trieloff.VCL",
+    "name": "VCL",
+    "organization": "Lars Trieloff",
+    "description": "Syntax highlighting and completion for Varnish Configuration Language",
+    "version": "1.0",
+    "categories": ["languages"]
+}
