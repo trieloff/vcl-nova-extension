@@ -3,6 +3,8 @@
     "name": "VCL",
     "organization": "Lars Trieloff",
     "description": "Syntax highlighting and completion for Varnish Configuration Language",
+    "repository": "https://github.com/trieloff/vcl-nova-extension/",
+    "issues": "https://github.com/trieloff/vcl-nova-extension/issues",
     "version": "1.0",
     "categories": ["languages"]
 }
